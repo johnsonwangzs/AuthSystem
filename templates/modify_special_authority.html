@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员 | 修改用户特权</title>
+    <meta name="viewport" content="width=device-width, initial-scale=0.8">
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <div class="container-fluid p-5 bg-warning text-black text-center">
+        <h1>修改用户特权</h1>
+        <h4>输入用户ID以进行搜索，并修改其特权</h4>
+    </div>
+    <div class="container my-3">
+        <div class="row">
+            <div class="col-3">
+                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><span class="badge rounded-pill bg-secondary" style="font-size: 10px">MainPage</span></li>
+                        <li class="breadcrumb-item active" aria-current="page"><span class="badge rounded-pill bg-secondary" style="font-size: 10px">ModifySpecialAuthority</span></li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-8"></div>
+            <div class="col-1">
+                <form method="GET" action="{{ '/user_main/' + current_user.id + '/' }}">
+                    <button type="submit" class="btn btn-outline-success">回主页</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="container my-2">
+        <form method="post" enctype="multipart/form-data" action="/app/modify_special_authority/">
+            <div class="row">
+                <div class="col-4"></div>
+                <label for="ID" class="col-1 col-form-label">输入用户ID: </label>
+                <div class="col-3">
+                    <input type="text" class="form-control" name="searchKeyword" placeholder="{{ keyword }}" id="ID" oninput="check_validity()">
+                </div>
+                <div class="col-3">
+                    <input type="submit" id="searchBtn" name="searchBtn" class="btn btn-primary" value="搜索">
+                </div>
+                <div class="col-1"></div>
+            </div>
+        </form>
+    </div>
+    <div class="container my-4">
+        {% if flag == '1' or flag == '2' %}
+            <div class="row">
+                <div class="col-1"></div>
+                <div class="col-3">
+                    <div class="card" style="width: 18rem;">
+                        <img src="{{ url_for('static', filename='/imgs/user_avatar.png') }}" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title"><span class="badge bg-success text-white">ID | Name</span><br>{{ res[0][0] }} | {{res[0][1]}}</h5>
+                            <p class="card-text"><span class="badge bg-info text-dark">Nickname</span><br>{{ res[0][2] }}</p>
+                            <p class="card-text"><span class="badge bg-info text-dark">Phone</span><br>{{ res[0][3] }}</p>
+                            <p class="card-text"><span class="badge bg-info text-dark">Email</span><br>{{ res[0][4] }}</p>
+                            <p class="card-text"><span class="badge bg-info text-dark">Description</span><br>{{ res[0][5] }}</p>
+                            <form method="post" action="/app/modify_special_authority/{{ keyword }}/">
+                                <button type="submit" class="btn btn-primary" name="modify" id="modify">修改权限</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% if flag == '2' %}
+                    <div class="col-7">
+                        <form method="post" action="/app/modify_special_authority/{{ keyword }}/implement/">
+                            <fieldset>
+                                <legend>修改用户特权</legend>
+                                <div class="mb-3">
+                                   <label for="appSelect" class="h5 form-label">选择应用：</label>
+                                   <select id="appSelect" class="form-select" name="appSelect">
+                                       <option selected>app_id | app_name 选择要修改用户权限的应用...</option>
+                                       {% for i in range(lenappres) %}
+                                       <option value={{appres[i][0]}}>- {{ appres[i][0] }} | {{ appres[i][1] }} -</option>
+                                       {% endfor %}}
+                                   </select>
+                                </div>
+                                <div class="mb-3">
+                                   <label for="rule" class="h5 form-label">选择应用：</label>
+                                   <select id="rule" class="form-select" name="ruleSelect">
+                                       <option selected>选择用户权限...</option>
+                                       <option value="permit">- 添加 允许访问APP特权 -</option>
+                                       <option value="deny">- 删除 允许访问APP特权 （该用户仍可能通过属组和角色权限访问APP） -</option>
+                                   </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">提交</button>
+                            </fieldset>
+                        </form>
+                    </div>
+                {% endif %}
+                <div class="col-1"></div>
+            </div>
+        {% endif %}
+    </div>
+    {% if flag == '3' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='/imgs/favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              已添加用户{{keyword}}对应用{{appId}}的访问特权！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if flag == '4' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='/imgs/favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              已取消用户{{keyword}}对应用{{appId}}的访问特权！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endif %}
+    <script>
+        var toastLive = document.getElementById('liveToast')
+        var toast = new bootstrap.Toast(toastLive);
+        toast.show();
+    </script>
+</body>
+</html>

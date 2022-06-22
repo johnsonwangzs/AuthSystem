@@ -13,6 +13,23 @@
         <h1>用户登录</h1>
         <h4>要访问资源，请使用您的ID和密码登录</h4>
     </div>
+    {% if flag == '1' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="../static/favicon.ico" class="rounded me-2" alt="...">
+              <strong class="me-auto">汪卓商</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              欢迎使用WebAuthSystem！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="container my-5">
         <div class="row">
             <div class="col-4"></div>
@@ -27,7 +44,7 @@
                     <label for="password" class="form-label h5">密码</label>
                     <input type="password" class="form-control form-control-lg" name="password" id="password">
                   </div>
-                  <button type="submit" class="btn btn-primary">登录</button>
+                  <button type="submit" class="btn btn-outline-primary">登录</button>
                 </form>
             </div>
             <div class="col-4"></div>
@@ -68,5 +85,10 @@
             <div class="col-2"></div>
         </div>
     </div>
+    <script>
+        var toastLive = document.getElementById('liveToast')
+        var toast = new bootstrap.Toast(toastLive);
+        toast.show();
+    </script>
 </body>
 </html>
