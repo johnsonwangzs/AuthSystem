@@ -163,8 +163,26 @@ def app_search_user():
         if not check_app_rule(current_user.id, DICT_appId['search_user']):
             return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
                                                         'permission to access the SEARCH_USER app.')
-        return render_template('search_user.html')
-    # if request.method == 'POST':
+        return render_template('search_user.html', flag='0')
+    if request.method == 'POST':
+        searchKeyword = request.form['searchKeyword']
+        res = []
+        try:
+            db = pymysql.connect(host='localhost', db='AuthProject', user='auth_project', passwd='123456', port=3306)
+            cursor = db.cursor()
+            sql = "select user_id,name,nickname,phone,email,description " \
+                  "from user_info " \
+                  "where user_id='{0}' or name='{0}' or nickname='{0}'".format(searchKeyword)
+            sql = "select user_id,name,nickname,phone,email,description " \
+                  "from user_info " \
+                  "where user_id='{0}' or ((select LOCATE('{0}',name))!=0) or ((select LOCATE('{0}',nickname))!=0)".format(searchKeyword)
+            cursor.execute(sql)
+            res = cursor.fetchall()
+            cursor.close()
+            print(res)
+        except:
+            print("[app_search_user]数据库查询失败！")
+        return render_template('search_user.html', flag='1', res=res, lres=len(res), keyword=searchKeyword)
 
 
 @app.route('/modify/')

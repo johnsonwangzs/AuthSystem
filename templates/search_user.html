@@ -13,26 +13,37 @@
         <h1>查询用户</h1>
         <h4>输入用户ID进行查询，结果将以列表呈现</h4>
     </div>
-    <div class="container my-5">
-        <form method="post" enctype="multipart/form-data">
+    <div class="container my-3">
+        <div class="row">
+            <div class="col-2">
+                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><span class="badge rounded-pill bg-secondary" style="font-size: 10px">MainPage</span></li>
+                        <li class="breadcrumb-item active" aria-current="page"><span class="badge rounded-pill bg-secondary" style="font-size: 10px">SearchUser</span></li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-9"></div>
+            <div class="col-1">
+                <form method="GET" action="{{ '/user_main/' + current_user.id + '/' }}">
+                    <button type="submit" class="btn btn-outline-success">回主页</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="container my-2">
+        <form method="post" enctype="multipart/form-data" action="/search/">
             <div class="row">
-                <label for="ID" class="col-1 col-form-label">输入用户ID: </label>
-                <div class="col-2">
-                    <input type="text" class="form-control" name="id" id="ID" oninput="check_validity()">
+                <div class="col-3"></div>
+                <label for="ID" class="col-2 col-form-label">输入用户ID/姓名/昵称: </label>
+                <div class="col-3">
+                    <input type="text" class="form-control" name="searchKeyword" placeholder="{{ keyword }}" id="ID" oninput="check_validity()">
                 </div>
                 <div class="col-3">
-                    <input type="button" id="search_id" class="btn btn-primary" value="搜索">
+                    <input type="submit" id="searchBtn" name="searchBtn" class="btn btn-primary" value="搜索">
                 </div>
-                <div class="col-4"></div>
-                <div class="col-2">
-                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item">MainPage</li>
-                            <li class="breadcrumb-item active" aria-current="page">SearchUser</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div> 
+                <div class="col-1"></div>
+            </div>
         </form>
     </div>
     <div class="container my-5 text-center">
@@ -43,19 +54,28 @@
             <thead>
                 <tr>
                     <th scope="col">#</th>
+                    <th scope="col">ID</th>
                     <th scope="col">姓名</th>
-                    <th scope="col">联系方式</th>
+                    <th scope="col">昵称</th>
+                    <th scope="col">手机</th>
+                    <th scope="col">邮箱</th>
                     <th scope="col">简介</th>
                 </tr>
             </thead>
             <tbody>
+                {% if flag=='1' %}
+                {% for i in range(lres) %}
                 <tr>
-                    <!--<th scope="row"></th>-->
-                    <!-- 第几行 -->
-                    <!--<td id="staff_name">{{name}}</td>-->
-                    <!--<td id="staff_phone">{{phone}}</td>-->
-                    <!--<td id="staff_profile">{{profile}}</td>-->
+                    <th scope="row">{{ i+1 }}</th>
+                    <td id="user_id">{{ res[i][0] }}</td>
+                    <td id="name">{{ res[i][1] }}</td>
+                    <td id="nickname">{{ res[i][2] }}</td>
+                    <td id="phone">{{ res[i][3] }}</td>
+                    <td id="email">{{ res[i][4] }}</td>
+                    <td id="description">{{ res[i][5] }}</td>
                 </tr>
+                {% endfor %}
+                {% endif %}
             </tbody>
         </table>
         <p id="test"></p>
@@ -70,8 +90,6 @@
             <div class="col-2"></div>
         </div>
     </div>
-    <script src="http://apps.bdimg.com/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="../static/js/modify_info.js"></script>
     <script>
         function check_validity() {
             let x = document.getElementById("ID").value;
