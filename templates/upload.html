@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>上传文件</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <div class="container-fluid p-5 bg-primary text-white text-center">
+        <h1>文件上传</h1>
+        <h4>选择本地文件，并将其上传到公司服务器</h4>
+    </div>
+    <div class="container my-5 text-center">
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-5">
+                <form method="post" enctype="multipart/form-data" class="row row-cols-lg-auto g-3 align-items-center">
+                    <div class="col-12">
+                        <input class="form-control" type="file" name="avatar" id="selectFile">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">确定上传</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-3"></div>
+        </div>
+    </div>
+    <div class="container text-center fixed-bottom">
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8">
+                <p><span class="badge rounded-pill bg-success" style="font-size: 15px">网络安全创新实验</span></p>
+                <p class="text-muted"><small>请使用电脑端最新版本浏览器访问，并保持页面原始缩放比例，以获得最佳浏览效果。</small></p>
+            </div>
+            <div class="col-2"></div>
+        </div>
+    </div>
+</body>
+</html>

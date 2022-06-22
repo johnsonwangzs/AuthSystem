@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户登入</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <div class="container-fluid p-5 bg-info text-white text-center">
+        <h1>用户登录</h1>
+        <h4>要访问资源，请使用您的ID和密码登录</h4>
+    </div>
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <form method="post" action="/login/">
+                  <div class="mb-3">
+                    <label for="userId" class="form-label h5">用户ID</label>
+                    <input type="id" class="form-control form-control-lg" name="userId" id="userId" aria-describedby="idHelp">
+                    <div id="idHelp" class="form-text">输入6位数字（0~9）组成的用户ID</div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="password" class="form-label h5">密码</label>
+                    <input type="password" class="form-control form-control-lg" name="password" id="password">
+                  </div>
+                  <button type="submit" class="btn btn-primary">登录</button>
+                </form>
+            </div>
+            <div class="col-4"></div>
+        </div>
+    </div>
+    {% if info=='alert_1' %}
+    <div class="container">
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <div class="alert alert-warning" role="alert">
+                    User doesn't exist!
+                </div>
+            </div>
+            <div class="col-4"></div>
+        </div>
+    </div>
+    {% elif info=='alert_2' %}
+    <div class="container">
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <div class="alert alert-warning" role="alert">
+                    Wrong password!
+                </div>
+            </div>
+            <div class="col-4"></div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="container text-center fixed-bottom">
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8">
+                <p><span class="badge rounded-pill bg-success" style="font-size: 15px">Python安全编程·实验测试网页</span></p>
+                <p class="text-muted"><small>请使用电脑端最新版本浏览器访问，并保持页面原始缩放比例，以获得最佳浏览效果。</small></p>
+            </div>
+            <div class="col-2"></div>
+        </div>
+    </div>
+</body>
+</html>
