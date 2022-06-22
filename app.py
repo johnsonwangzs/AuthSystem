@@ -20,7 +20,7 @@ loginManager.session_protection = 'basic'
 
 loginManager.init_app(app)  # loginManager绑定到当前app
 
-appId_dict = {'search_user': 1}
+DICT_appId = {'search_user': '0001'}
 ADMIN = '000000'  # 管理员ID
 
 
@@ -160,7 +160,7 @@ def app_search_user():
     :return:
     """
     if request.method == 'GET':
-        if not check_app_rule(current_user.id, appId_dict['search_user']):
+        if not check_app_rule(current_user.id, DICT_appId['search_user']):
             return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
                                                         'permission to access the SEARCH_USER app.')
         return render_template('search_user.html')

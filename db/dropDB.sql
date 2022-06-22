@@ -1,2 +1,12 @@
 DROP TABLE login;
 DROP TABLE user_info;
+DROP TABLE group_info;
+DROP TABLE role_info;
+DROP TABLE app_info;
+DROP TABLE user_authority;
+DROP TABLE app_group_rule;
+DROP TABLE app_role_rule;
+DROP TABLE app_user_rule; 
+DROP TABLE file_group_rule;
+DROP TABLE file_role_rule;
+DROP TABLE file_user_rule;
