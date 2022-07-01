@@ -1,5 +1,21 @@
 # AuthSystem
 A authentication and authority management system based on Flask.
+
+---
+
+# 使用说明
+1. 将所有文件下载并保存为一个Python项目。
+2. 安装Flask和Flash-Login。
+3. 将db目录下的createDB.sql作为MySQL脚本导入。
+4. 创建一个数据库用户，根据数据库具体配置修改app.py中用于连接数据库的常量。
+5. 在app.py下运行程序，浏览器打开http://127.0.0.1:5000。
+6. Enjoy yourself!
+
+注：部分功能待实现。
+
+---
+
+
 # 用户身份认证及权限管理系统设计文档
 
 ## 1 主要功能
