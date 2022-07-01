@@ -9,7 +9,22 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
-    <div class="container-fluid p-5 bg-warning text-black text-center">
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              欢迎回来！
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="container-fluid p-3 bg-warning text-black text-center shadow-lg">
         <h1>管理员控制台</h1>
         <h4>选择您要进行的操作</h4>
     </div>
@@ -28,7 +43,7 @@
     <div class="container my-5">
         <div class="row">
             <div class="col-3">
-                <div class="card border-dark">
+                <div class="card border-dark shadow-lg">
                     <div class="card-header text-center">
                         操作1
                     </div>
@@ -42,7 +57,7 @@
                 </div>
             </div>
             <div class="col-3">
-                <div class="card border-dark">
+                <div class="card border-dark shadow-lg">
                     <div class="card-header text-center">
                         操作2
                     </div>
@@ -56,42 +71,122 @@
                 </div>
             </div>
             <div class="col-3">
-                <div class="card border-dark">
+                <div class="card border-dark shadow-lg">
                     <div class="card-header text-center">
                         操作3
                     </div>
                     <div class="card-body">
-                        <h3 class="card-title plcaeholder-glow">
-                            <span class="placeholder col-6"></span>
-                        </h3>
-                        <p class="card-text placeholder-glow">
-                          <span class="placeholder col-7"></span>
-                          <span class="placeholder col-4"></span>
-                          <span class="placeholder col-4"></span>
-                          <span class="placeholder col-6"></span>
-                          <span class="placeholder col-8"></span>
-                        </p>
-                        <input class="btn btn-primary" type="button" value="" onclick="location.href='/search/'">
+                        <h3 class="card-title">修改个人信息</h3>
+                        <br>
+                        <p class="card-text">点击按钮，<mark>修改</mark>您的个人信息。</p>
+                        <br>
+                        <br>
+                        <input class="btn btn-primary" type="button" value="修改信息" onclick="location.href='/app/modify_my_info/'">
                     </div>
                 </div>
             </div>
             <div class="col-3">
-                <div class="card border-dark">
+                <div class="card border-dark shadow-lg">
                     <div class="card-header text-center">
                         操作4
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">上传文件</h3>
+                        <br>
+                        <p class="card-text">点击按钮，<mark>上传文件</mark>到服务器。</p>
+                        <br>
+                        <br>
+                        <input class="btn btn-primary" type="button" value="上传文件" onclick="location.href='/app/upload_file/'">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br><br>
+        <div class="row">
+            <div class="col-3">
+                <div class="card border-dark shadow-lg">
+                    <div class="card-header text-center">
+                        操作4
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">下载文件</h3>
+                        <br>
+                        <p class="card-text">点击按钮，<mark>下载文件</mark>到本地。</p>
+                        <br>
+                        <br>
+                        <input class="btn btn-primary" type="button" value="下载文件" onclick="location.href='/app/download_file/'">
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card border-dark shadow-lg">
+                    <div class="card-header text-center">
+                        操作6
                     </div>
                     <div class="card-body">
                         <h3 class="card-title plcaeholder-glow">
                             <span class="placeholder col-6"></span>
                         </h3>
                         <p class="card-text placeholder-glow">
-                          <span class="placeholder col-7"></span>
-                          <span class="placeholder col-4"></span>
-                          <span class="placeholder col-4"></span>
-                          <span class="placeholder col-6"></span>
-                          <span class="placeholder col-8"></span>
+                            <span class="placeholder col-7"></span>
+                            <span class="placeholder col-4"></span>
+                            <span class="placeholder col-4"></span>
+                            <span class="placeholder col-6"></span>
+                            <span class="placeholder col-8"></span>
+                            <span class="placeholder col-10"></span>
                         </p>
-                        <input class="btn btn-primary" type="button" value="" onclick="location.href='/search/'">
+                        <button class="btn btn-primary" type="button" disabled>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            功能维护中...
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card border-dark shadow-lg">
+                    <div class="card-header text-center">
+                        操作7
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title plcaeholder-glow">
+                            <span class="placeholder col-6"></span>
+                        </h3>
+                        <p class="card-text placeholder-glow">
+                            <span class="placeholder col-7"></span>
+                            <span class="placeholder col-4"></span>
+                            <span class="placeholder col-4"></span>
+                            <span class="placeholder col-6"></span>
+                            <span class="placeholder col-8"></span>
+                            <span class="placeholder col-10"></span>
+                        </p>
+                        <button class="btn btn-primary" type="button" disabled>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            功能维护中...
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card border-dark shadow-lg">
+                    <div class="card-header text-center">
+                        操作8
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title plcaeholder-glow">
+                            <span class="placeholder col-6"></span>
+                        </h3>
+                        <p class="card-text placeholder-glow">
+                            <span class="placeholder col-7"></span>
+                            <span class="placeholder col-4"></span>
+                            <span class="placeholder col-4"></span>
+                            <span class="placeholder col-6"></span>
+                            <span class="placeholder col-8"></span>
+                            <span class="placeholder col-10"></span>
+                        </p>
+                        <button class="btn btn-primary" type="button" disabled>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            功能维护中...
+                        </button>
                     </div>
                 </div>
             </div>
@@ -107,5 +202,10 @@
             <div class="col-2"></div>
         </div>
     </div>
+    <script>
+        var toastLive = document.getElementById('liveToast')
+        var toast = new bootstrap.Toast(toastLive);
+        toast.show();
+    </script>
 </body>
 </html>

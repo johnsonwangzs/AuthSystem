@@ -9,7 +9,7 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
-    <div class="container-fluid p-5 bg-warning text-black text-center">
+    <div class="container-fluid p-3 bg-warning text-black text-center shadow-lg">
         <h1>修改用户特权</h1>
         <h4>输入用户ID以进行搜索，并修改其特权</h4>
     </div>
@@ -80,7 +80,7 @@
                                    </select>
                                 </div>
                                 <div class="mb-3">
-                                   <label for="rule" class="h5 form-label">选择应用：</label>
+                                   <label for="rule" class="h5 form-label">选择规则：</label>
                                    <select id="rule" class="form-select" name="ruleSelect">
                                        <option selected>选择用户权限...</option>
                                        <option value="permit">- 添加 允许访问APP特权 -</option>

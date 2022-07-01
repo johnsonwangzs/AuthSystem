@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>上传文件</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    {% if user=='000000' %}
+    <div class="container-fluid p-3 bg-warning text-black text-center shadow-lg">
+        <h1>上传文件</h1>
+        <h4>选择要上传的本地文件，并将其保存到服务器</h4>
+        <h5>请注意，与您同一属组，或角色等级比您高的人都可访问并下载您上传的文件</h5>
+    </div>
+    {% else %}
+    <div class="container-fluid p-3 bg-primary text-white text-center shadow-lg">
+        <h1>上传文件</h1>
+        <h4>选择要上传的本地文件，并将其保存到服务器</h4>
+        <h5>请注意，与您同一属组，或角色等级比您高的人都可访问并下载您上传的文件</h5>
+    </div>
+    {% endif %}
+    {% if flag == '1' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='/imgs/favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              文件已上传！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% elif flag == '-1' %}
+        <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='/imgs/favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              未选择要上传的文件！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% elif flag == '2' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='/imgs/favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              文件上传成功！
+                （注：服务器中原有的同名文件，已被替换为您新上传的文件）
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="container my-3">
+        <div class="row">
+            <div class="col-3">
+                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><span class="badge rounded-pill bg-secondary" style="font-size: 10px">MainPage</span></li>
+                        <li class="breadcrumb-item active" aria-current="page"><span class="badge rounded-pill bg-secondary" style="font-size: 10px">UploadFile</span></li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-8"></div>
+            <div class="col-1">
+                <form method="GET" action="{{ '/user_main/' + current_user.id + '/' }}">
+                    <button type="submit" class="btn btn-outline-success">回主页</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="container my-3 text-center">
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6">
+                <form method="post" action="/app/upload_file/" enctype="multipart/form-data" class="row row-cols-lg-auto g-3 align-items-center">
+                    <label for="file" class="h5 form-label fw-bold">选择本地文件</label>
+                    <input class="form-control" type="file" name="file" id="file">
+                    <label for="description" class="h5 form-label fw-bold">文件说明</label>
+                    <textarea type="text" id="description" rows="3" class="form-control" name="description"></textarea>
+                    <button type="submit" class="btn btn-primary">确定上传</button>
+                </form>
+            </div>
+            <div class="col-3"></div>
+        </div>
+    </div>
+    {% if flag=='1' or flag=='2' %}
+    <div class="container">
+        <div class="row">
+            <div class="col"></div>
+            <div class="col">
+                <div class="card" style="width: 29rem;">
+                    <div class="card-header h5">
+                        最近上传文件信息
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><span class="badge bg-success text-white" style="font-size: 14px">文件名</span> {{ filename }}</li>
+                        <li class="list-group-item"><span class="badge bg-success text-white" style="font-size: 14px">文件类型</span> {{ filetype }}</li>
+                        <li class="list-group-item"><span class="badge bg-success text-white" style="font-size: 14px">上传日期</span> {{ fileuploadtime }}</li>
+                        <li class="list-group-item"><span class="badge bg-success text-white" style="font-size: 14px">上传者</span> {{ fileuploader }}</li>
+                        <li class="list-group-item"><span class="badge bg-success text-white" style="font-size: 14px">文件说明</span> {{ filedescription }}</li>
+                        <li class="list-group-item"><span class="badge bg-success text-white" style="font-size: 14px">文件大小</span> {{ filesize }}</li>
+                        <li class="list-group-item"><span class="badge bg-success text-white" style="font-size: 14px">文件临时存储路径</span> {{ filepath }}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+    </div>
+    {% endif %}
+    <script>
+        var toastLive = document.getElementById('liveToast')
+        var toast = new bootstrap.Toast(toastLive);
+        toast.show();
+    </script>
+</body>
+</html>

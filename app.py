@@ -5,9 +5,10 @@
 # @Software : PyCharm
 # @Function :
 
-from flask import Flask, redirect, url_for, render_template, request, flash
+from flask import Flask, redirect, url_for, render_template, request, send_file
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 import pymysql
+import datetime
 
 app = Flask(__name__)  # 初始化Flask app
 app.secret_key = 'WZS_say_hello_to_Flask'
@@ -20,7 +21,11 @@ loginManager.needs_refresh_message = 'Refresh for login!'
 loginManager.session_protection = 'basic'
 loginManager.init_app(app)  # loginManager绑定到当前app
 
-DICT_appId = {'SearchUser': '0001', 'ModifySpecialAuthority': '0004'}
+DICT_appId = {'SearchUser': '0001',
+              'UploadFile': '0002',
+              'DownloadFile': '0003',
+              'ModifySpecialAuthority': '0004',
+              'ModifyMyInfo': '0005'}
 ADMIN = '000000'  # 管理员ID
 HOST = 'localhost'
 DB = 'AuthProject'
@@ -233,7 +238,7 @@ def app_search_user():
 @login_required
 def app_modify_special_authority():
     """
-    （管理员）可以修改用户的权限
+    （管理员）可以修改用户的权限-初始页面
     :return:
     """
     if request.method == 'GET':
@@ -253,9 +258,14 @@ def app_modify_special_authority():
         return render_template('modify_special_authority.html', flag='1', keyword=searchKeyword, res=res)  # 搜索到用户，展示
 
 
-@app.route('/app/modify_special_authority/<ID>/', methods=['GET', 'POST'])
+@app.route('/app/modify_special_authority/<ID>/', methods=['POST'])
 @login_required
 def app_modify_special_authority_modify(ID=None):
+    """
+    （管理员）可以修改用户的权限-修改页面
+    :param ID:
+    :return:
+    """
     if request.method == 'POST':
         if ID is not None:
             sql = "select user_id,name,nickname,phone,email,description " \
@@ -267,15 +277,20 @@ def app_modify_special_authority_modify(ID=None):
             return render_template('modify_special_authority.html', flag='2', keyword=ID, res=res, appres=appres, lenappres=len(appres))  # 搜索到用户，展示
 
 
-@app.route('/app/modify_special_authority/<ID>/implement/', methods=['GET', 'POST'])
+@app.route('/app/modify_special_authority/<ID>/implement/', methods=['POST'])
 @login_required
 def app_modify_special_authority_implement(ID=None):
+    """
+    （管理员）可以修改用户的权限-执行修改页面
+    :param ID:
+    :return:
+    """
     if request.method == 'POST':
         if ID is not None:
             appId = request.form['appSelect']
             userId = ID
             rule = request.form['ruleSelect']
-            if rule == 'permit':
+            if rule == 'permit':  # 新增用户特权
                 sql = "select max(app_user_rule_id) from app_user_rule";
                 res = sql_query(sql)
                 if res[0][0] is None:  # 空表
@@ -286,10 +301,155 @@ def app_modify_special_authority_implement(ID=None):
                 print(appId, rule, userId, maxRuleId, sql)
                 sql_modify(sql)
                 return render_template('modify_special_authority.html', flag='3', keyword=ID, appId=appId)
-            elif rule == 'deny':
+            elif rule == 'deny':  # 取消用户（已有）特权
                 sql = "delete from app_user_rule where app_id='{0}' and user_id='{1}';".format(appId, userId)
                 sql_modify(sql)
                 return render_template('modify_special_authority.html', flag='4', keyword=ID, appId=appId)
+
+
+@app.route('/app/modify_my_info/', methods=['GET', 'POST'])
+@login_required
+def app_modify_my_info():
+    """
+    用户修改其个人信息
+    :return:
+    """
+    if request.method == 'GET':
+        if not check_app_accessibility(current_user.id, DICT_appId['ModifyMyInfo']):
+            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
+                                                        'permission to access the MODIFY_MY_INFO app.')
+        sql = "select user_id,name,nickname,phone,email,description " \
+              "from user_info " \
+              "where user_id='{0}'".format(current_user.id)
+        res = sql_query(sql)
+        return render_template('modify_my_info.html', user=current_user.id, res=res)
+    if request.method == 'POST':
+        sql = "select user_id,name,nickname,phone,email,description " \
+              "from user_info " \
+              "where user_id='{0}'".format(current_user.id)
+        res = sql_query(sql)
+        newNickname = request.form['nickname'] if request.form['nickname'] != '' else res[0][2]
+        newPhone = request.form['phone'] if request.form['phone'] != '' else res[0][3]
+        newEmail = request.form['email'] if request.form['email'] != '' else res[0][4]
+        newDescription = request.form['description'] if request.form['description'] != '' else res[0][5]
+        sql = "update user_info " \
+              "set nickname='{0}',phone='{1}',email='{2}',description='{3}' " \
+              "where user_id='{4}'".format(newNickname,newPhone,newEmail,newDescription,current_user.id)
+        sql_modify(sql)
+        sql = "select user_id,name,nickname,phone,email,description " \
+              "from user_info " \
+              "where user_id='{0}'".format(current_user.id)
+        res = sql_query(sql)
+        return render_template('modify_my_info.html', user=current_user.id, res=res, flag='1')
+
+
+@app.route('/app/upload_file/', methods=['GET', 'POST'])
+@login_required
+def app_upload_file():
+    """
+    用户上传文件到服务器
+    :return:
+    """
+    if request.method == 'GET':
+        if not check_app_accessibility(current_user.id, DICT_appId['UploadFile']):
+            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
+                                                        'permission to access the UPLOAD_FILE app.')
+        return render_template('upload_file.html', user=current_user.id)
+
+    if request.method == 'POST':
+        fileObj = request.files.get("file")
+        if fileObj is None:
+            return render_template('upload_file.html', user=current_user.id, flag='-1')
+        fileName = fileObj.filename
+        fileDescription = request.form.get("description")
+        fileUploadTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        fileObj.save('./file_archive/' + fileName)
+
+        flag = '1'
+        sql = "select * from file_info where file_name='{0}';".format(fileName)
+        res = sql_query(sql)
+        if len(res) != 0:  # 对同名文件：删除旧文件，替换为新的
+            flag = '2'
+            sql = "delete from file_info where file_name='{0}';".format(fileName)
+            sql_modify(sql)
+
+        sql = "select max(file_id) from file_info;"
+        res = sql_query(sql)
+        if res[0][0] is None:
+            maxId = 0
+        else:
+            maxId = res[0][0]
+
+        sql = "insert into file_info(file_id,file_name,file_description,file_uploader,file_uploadtime) " \
+              "values ({0},'{1}','{2}','{3}','{4}')".format(maxId+1, fileName, fileDescription, current_user.id, fileUploadTime)
+        sql_modify(sql)
+
+        return render_template('upload_file.html', user=current_user.id, flag=flag,
+                               filename=fileObj.filename, filetype=fileObj.content_type,
+                               filedescription=fileDescription, fileuploader=current_user.id,
+                               fileuploadtime=fileUploadTime, filesize='未知', filepath='未知')
+
+
+def check_file_accessibility(userId, fileId):
+    """
+    查询用户对某个file的可下载权限。如果数据库查询有结果，说明该用户对该file具备访问权。
+    可访问定义为，请求文件的用户需要具备比上传文件用户更高的角色等级，或者与其在同一属组。
+    :return: 是否具备访问权
+    """
+    # 0. 确定用户所属角色和所属组
+    sql = "select group_id,role_id from user_authority where user_id='{0}';".format(userId)
+    res = sql_query(sql)
+    userGroupId, userRoleId = res[0][0], res[0][1]
+
+    sql = "select file_uploader from file_info where file_id='{0}';".format(fileId)
+    res = sql_query(sql)
+    print(res)
+    uploaderId = res[0][0]
+    sql = "select group_id,role_id from user_authority where user_id='{0}';".format(uploaderId)
+    res = sql_query(sql)
+    uploaderGroupId, uploaderRoleId = res[0][0], res[0][1]
+
+    # 1. 检查当前用户是否具备更高角色等级
+    print(userRoleId, uploaderRoleId)
+    if userRoleId <= uploaderRoleId:
+        return True
+
+    # 2. 检查当前用户是否为同一属组
+    if userGroupId == uploaderGroupId:
+        return True
+
+    # 如果按任意规则用户均不具备对app的访问权
+    return False
+
+
+@app.route('/app/download_file/', methods=['GET', 'POST'])
+@login_required
+def app_download_file():
+    """
+    用户从服务器下载文件
+    :return:
+    """
+    # 从数据库取出所有文件的信息
+    sql = "select * from file_info"
+    fileres = sql_query(sql)
+    if request.method == 'GET':
+        if not check_app_accessibility(current_user.id, DICT_appId['DownloadFile']):
+            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
+                                                        'permission to access the DOWNLOAD_FILE app.')
+        return render_template('download_file.html', user=current_user.id, res=fileres, lenres=len(fileres))
+
+    if request.method == 'POST':
+        fileBtn = list(request.form.keys())[0]  # 用户点击的按钮的name
+        fileId = list(request.form.values())[0]  # 用户点击的按钮的value，即用户请求下载的文件ID
+        if check_file_accessibility(current_user.id, fileId):  # 检查用户访问文件的权限
+            sql = "select file_name from file_info where file_id='{0}';".format(fileId)
+            res = sql_query(sql)
+            try:
+                return send_file('file_archive/' + res[0][0])
+            except FileNotFoundError:  # 数据库中有记录，但服务器缺失文件
+                return render_template('download_file.html', user=current_user.id, flag='-1', res=fileres, lenres=len(fileres))
+        else:  # 无权限访问该文件
+            return render_template('download_file.html', user=current_user, flag='-2', res=fileres, lenres=len(fileres))
 
 
 if __name__ == "__main__":

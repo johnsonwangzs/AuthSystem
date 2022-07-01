@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改个人信息</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    {% if user=='000000' %}
+    <div class="container-fluid p-3 bg-warning text-black text-center shadow-lg">
+        <h1>修改个人信息</h1>
+        <h4>在此修改您的个人信息</h4>
+    </div>
+    {% else %}
+    <div class="container-fluid p-3 bg-primary text-white text-center shadow-lg">
+        <h1>修改个人信息</h1>
+        <h4>在此修改您的个人信息</h4>
+    </div>
+    {% endif %}
+    {% if flag == '1' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='/imgs/favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              您的个人信息已经修改成功！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="container my-3">
+        <div class="row">
+            <div class="col-3">
+                <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><span class="badge rounded-pill bg-secondary" style="font-size: 10px">MainPage</span></li>
+                        <li class="breadcrumb-item active" aria-current="page"><span class="badge rounded-pill bg-secondary" style="font-size: 10px">ModifyMyInfo</span></li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-8"></div>
+            <div class="col-1">
+                <form method="GET" action="{{ '/user_main/' + current_user.id + '/' }}">
+                    <button type="submit" class="btn btn-outline-success">回主页</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="container my-2">
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-3">
+                <div class="card shadow-lg" style="width: 22rem;">
+                    <div class="h4 fw-bold card-header text-center">
+                        个人信息卡片
+                    </div>
+                    <img src="{{ url_for('static', filename='/imgs/user_avatar.png') }}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title"><span class="badge bg-success text-white" style="font-size: 17px">ID</span> {{ res[0][0] }}</h5>
+                        <h5 class="card-title"><span class="badge bg-success text-white" style="font-size: 17px">Name</span> {{ res[0][1] }}</h5>
+                        <h6 class="card-text"><span class="badge bg-primary text-white" style="font-size: 16px">Nickname</span> {{ res[0][2] }}</h6>
+                        <h6 class="card-text"><span class="badge bg-primary text-white" style="font-size: 16px">Phone</span> {{ res[0][3] }}</h6>
+                        <h6 class="card-text"><span class="badge bg-primary text-white" style="font-size: 16px">Email</span> {{ res[0][4] }}</h6>
+                        <h6 class="card-text"><span class="badge bg-info text-dark" style="font-size: 15px">Description</span><br>{{ res[0][5] }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2"></div>
+            <div class="col-3 bg-light shadow-lg">
+                <br>
+                <form method="post" action="/app/modify_my_info/" enctype="multipart/form-data" >
+                    <div class="mb-3">
+                        <label for="nickname" class="h5 from-label fw-bold">昵称 | NICKNAME</label>
+                        <input class="form-control" id="nickname" name="nickname" placeholder="{{ res[0][2] }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="h5 from-label fw-bold">电话 | PHONE</label>
+                        <input class="form-control" id="phone" name="phone" placeholder="{{ res[0][3] }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="h5 from-label fw-bold">邮箱 | Email</label>
+                        <input class="form-control" id="email" name="email" placeholder="{{ res[0][4] }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="h5 form-label fw-bold">个人简介 | Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="7" placeholder="{{ res[0][5] }}"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary float-end">提交修改</button>
+                </form>
+            </div>
+            <div class="col-2"></div>
+        </div>
+    </div>
+    <script>
+        var toastLive = document.getElementById('liveToast')
+        var toast = new bootstrap.Toast(toastLive);
+        toast.show();
+    </script>
+</body>
+</html>

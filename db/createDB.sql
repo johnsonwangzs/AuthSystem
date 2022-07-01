@@ -43,6 +43,15 @@ CREATE TABLE app_info(
 	app_description VARCHAR(200)
 );
 
+-- 创建文件信息表
+CREATE TABLE file_info(
+	file_id INTEGER PRIMARY KEY,
+	file_name VARCHAR(50) NOT NULL,
+	file_description VARCHAR(200),
+	file_uploader VARCHAR(50),
+	file_uploadtime VARCHAR(200)
+);
+
 -- 创建用户权限表
 CREATE TABLE user_authority(
 	user_id VARCHAR(50) PRIMARY KEY,
@@ -73,24 +82,24 @@ CREATE TABLE app_user_rule(
 
 -- 创建文件-组许可规则
 CREATE TABLE file_group_rule(
-	app_group_rule_id INTEGER PRIMARY KEY,
-	file_id VARCHAR(50) NOT NULL,
+	file_group_rule_id INTEGER PRIMARY KEY,
+	file_id INTEGER NOT NULL,
 	group_id VARCHAR(50),
 	rule VARCHAR(50) NOT NULL
 );
 
 -- 创建文件-角色许可规则
 CREATE TABLE file_role_rule(
-	app_role_rule_id INTEGER PRIMARY KEY,
-	file_id VARCHAR(50) NOT NULL,
+	file_role_rule_id INTEGER PRIMARY KEY,
+	file_id INTEGER NOT NULL,
 	role_id VARCHAR(50) NOT NULL,
 	rule VARCHAR(50) NOT NULL
 );
 
 -- 创建文件-用户许可规则
 CREATE TABLE file_user_rule(
-	app_user_rule_id INTEGER PRIMARY KEY,
-	file_id VARCHAR(50) NOT NULL,
+	file_user_rule_id INTEGER PRIMARY KEY,
+	file_id INTEGER NOT NULL,
 	user_id VARCHAR(50) NOT NULL,
 	rule VARCHAR(50) NOT NULL
 );
@@ -132,9 +141,10 @@ INSERT INTO AuthProject.role_info(role_id, role_name, role_level, role_descripti
 
 
 INSERT INTO AuthProject.app_info(app_id, app_name, app_description) values ('0001', 'SearchUser', 'Search users in database.');
-INSERT INTO AuthProject.app_info(app_id, app_name, app_description) values ('0002', 'FileArchive', 'Archive of files.');
-INSERT INTO AuthProject.app_info(app_id, app_name, app_description) values ('0003', 'ModifyInfo', 'Modify others personal information.');
+INSERT INTO AuthProject.app_info(app_id, app_name, app_description) values ('0002', 'UploadFile', 'Upload files and save them to the server.');
+INSERT INTO AuthProject.app_info(app_id, app_name, app_description) values ('0003', 'DownloadFile', 'Download files saved in the server.');
 INSERT INTO AuthProject.app_info(app_id, app_name, app_description) values ('0004', 'ModifySpecialAuthority', 'Modify special authority of users.');
+INSERT INTO AuthProject.app_info(app_id, app_name, app_description) values ('0005', 'ModifyMyInfo', 'Users modify their own information.');
 
 
 INSERT INTO AuthProject.user_authority(user_id, group_id, role_id) values ('000000', '00', '000');
@@ -151,8 +161,17 @@ INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) valu
 INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (2, '0001', '01');
 INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (3, '0002', '00');
 INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (4, '0002', '01');
-INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (5, '0003', '00');
-INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (6, '0004', '00');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (5, '0002', '02');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (6, '0002', '03');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (7, '0003', '00');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (8, '0003', '01');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (9, '0003', '02');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (10, '0003', '03');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (11, '0004', '00');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (12, '0005', '00');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (13, '0005', '01');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (14, '0005', '02');
+INSERT INTO AuthProject.app_group_rule(app_group_rule_id, app_id, group_id) values (15, '0005', '03');
 
 
 INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (1, '0001', '000');
@@ -163,7 +182,27 @@ INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values 
 INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (6, '0002', '001');
 INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (7, '0002', '002');
 INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (8, '0002', '003');
-INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (9, '0003', '000');
-INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (10, '0004', '000');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (9, '0002', '004');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (10, '0002', '005');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (11, '0002', '006');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (12, '0002', '007');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (13, '0003', '000');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (14, '0003', '001');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (15, '0003', '002');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (16, '0003', '003');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (17, '0003', '004');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (18, '0003', '005');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (19, '0003', '006');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (20, '0003', '007');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (21, '0004', '000');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (22, '0005', '000');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (23, '0005', '001');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (24, '0005', '002');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (25, '0005', '003');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (26, '0005', '004');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (27, '0005', '005');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (28, '0005', '006');
+INSERT INTO AuthProject.app_role_rule(app_role_rule_id, app_id, role_id) values (29, '0005', '007');
+
 
 
