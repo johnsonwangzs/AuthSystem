@@ -25,7 +25,11 @@ DICT_appId = {'SearchUser': '0001',
               'UploadFile': '0002',
               'DownloadFile': '0003',
               'ModifySpecialAuthority': '0004',
-              'ModifyMyInfo': '0005'}
+              'ModifyMyInfo': '0005',
+              'ManageGroupRule': '0006',
+              'ManageRoleRule': '0007',
+              'ManageUser': '0008'}
+
 ADMIN = '000000'  # 管理员ID
 HOST = 'localhost'
 DB = 'AuthProject'
@@ -229,9 +233,11 @@ def app_search_user():
         # 此处支持模糊搜索
         sql = "select user_id,name,nickname,phone,email,description " \
               "from user_info " \
-              "where user_id='{0}' or ((select LOCATE('{0}',name))!=0) or ((select LOCATE('{0}',nickname))!=0)".format(searchKeyword)
+              "where user_id='{0}' or ((select LOCATE('{0}',name))!=0) " \
+              "or ((select LOCATE('{0}',nickname))!=0)".format(searchKeyword)
         res = sql_query(sql)
-        return render_template('search_user.html', flag='1', res=res, lres=len(res), keyword=searchKeyword, user=current_user.id)
+        return render_template('search_user.html', flag='1', res=res, lres=len(res), keyword=searchKeyword,
+                               user=current_user.id)
 
 
 @app.route('/app/modify_special_authority/', methods=['GET', 'POST'])
@@ -274,7 +280,8 @@ def app_modify_special_authority_modify(ID=None):
             res = sql_query(sql)
             sql = "select app_id,app_name from app_info;"
             appres = sql_query(sql)
-            return render_template('modify_special_authority.html', flag='2', keyword=ID, res=res, appres=appres, lenappres=len(appres))  # 搜索到用户，展示
+            return render_template('modify_special_authority.html', flag='2', keyword=ID, res=res, appres=appres,
+                                   lenappres=len(appres))  # 搜索到用户，展示
 
 
 @app.route('/app/modify_special_authority/<ID>/implement/', methods=['POST'])
@@ -297,7 +304,8 @@ def app_modify_special_authority_implement(ID=None):
                     maxRuleId = 0
                 else:
                     maxRuleId = res[0][0]
-                sql = "insert into app_user_rule(app_user_rule_id,app_id,user_id) values ({0},'{1}','{2}');".format(maxRuleId+1, appId, userId)
+                sql = "insert into app_user_rule(app_user_rule_id,app_id,user_id) " \
+                      "values ({0},'{1}','{2}');".format(maxRuleId + 1, appId, userId)
                 print(appId, rule, userId, maxRuleId, sql)
                 sql_modify(sql)
                 return render_template('modify_special_authority.html', flag='3', keyword=ID, appId=appId)
@@ -334,7 +342,7 @@ def app_modify_my_info():
         newDescription = request.form['description'] if request.form['description'] != '' else res[0][5]
         sql = "update user_info " \
               "set nickname='{0}',phone='{1}',email='{2}',description='{3}' " \
-              "where user_id='{4}'".format(newNickname,newPhone,newEmail,newDescription,current_user.id)
+              "where user_id='{4}'".format(newNickname, newPhone, newEmail, newDescription, current_user.id)
         sql_modify(sql)
         sql = "select user_id,name,nickname,phone,email,description " \
               "from user_info " \
@@ -381,7 +389,8 @@ def app_upload_file():
             maxId = res[0][0]
 
         sql = "insert into file_info(file_id,file_name,file_description,file_uploader,file_uploadtime) " \
-              "values ({0},'{1}','{2}','{3}','{4}')".format(maxId+1, fileName, fileDescription, current_user.id, fileUploadTime)
+              "values ({0},'{1}','{2}','{3}','{4}')".format(maxId + 1, fileName, fileDescription, current_user.id,
+                                                            fileUploadTime)
         sql_modify(sql)
 
         return render_template('upload_file.html', user=current_user.id, flag=flag,
@@ -447,9 +456,135 @@ def app_download_file():
             try:
                 return send_file('file_archive/' + res[0][0])
             except FileNotFoundError:  # 数据库中有记录，但服务器缺失文件
-                return render_template('download_file.html', user=current_user.id, flag='-1', res=fileres, lenres=len(fileres))
+                return render_template('download_file.html', user=current_user.id, flag='-1', res=fileres,
+                                       lenres=len(fileres))
         else:  # 无权限访问该文件
             return render_template('download_file.html', user=current_user, flag='-2', res=fileres, lenres=len(fileres))
+
+
+@app.route('/app/manage_user/', methods=['GET', 'POST'])
+@login_required
+def app_manage_user():
+    """
+    （管理员）管理用户
+    :return:
+    """
+    if request.method == 'GET':
+        if not check_app_accessibility(current_user.id, DICT_appId['ManageUser']):
+            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
+                                                        'permission to access the MANAGE_USER app.')
+        return render_template('manage_user.html')
+
+
+@app.route('/app/manage_group_rule/', methods=['GET'])
+@login_required
+def app_manage_group_rule():
+    """
+    （管理员）管理应用-组规则【页面】
+    :return:
+    """
+    if request.method == 'GET':
+        if not check_app_accessibility(current_user.id, DICT_appId['ManageGroupRule']):
+            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
+                                                        'permission to access the MANAGE_GROUP_RULE app.')
+        sql = "select * from group_info;"
+        res = sql_query(sql)
+        group = []
+        for i in range(len(res)):
+            tmp = list(res[i])
+            sql = "select app_info.app_id,app_name " \
+                  "from app_group_rule,app_info " \
+                  "where app_group_rule.app_id=app_info.app_id and group_id='{0}' " \
+                  "order by app_group_rule.app_id;".format(res[i][0])
+            res1 = sql_query(sql)
+            tmp.append(res1)
+            group.append(tmp)
+        return render_template('manage_group_rule.html', flag='1', groupInfo=group, lenres=len(res))
+
+
+@app.route('/app/manage_group_rule/<groupId>/', methods=['GET', 'POST'])
+@login_required
+def app_manage_group_rule_modify(groupId=None):
+    """
+    修改某个组的规则【页面】
+    :param groupId: 组ID
+    :return:
+    """
+    if groupId is None and request.method == 'POST':
+        modBtn = list(request.form.keys())[0]  # 用户点击的按钮的name
+        modId = list(request.form.values())[0]  # 用户点击的按钮的value，即用户请求修改的组ID
+    else:
+        modId = groupId
+    sql = "select * from group_info where group_id='{0}';".format(modId)
+    res = sql_query(sql)
+
+    appIdList = list(DICT_appId.values())
+    sql = "select app_id,app_name,app_description " \
+          "from app_info " \
+          "order by app_id;"
+    allAppInfo = sql_query(sql)
+    sql = "select app_info.app_id " \
+          "from app_group_rule,app_info " \
+          "where app_group_rule.app_id=app_info.app_id and group_id='{0}' " \
+          "order by app_info.app_id;".format(modId)
+    curGroupAppIdList = sql_query(sql)
+    ruleInfo = []
+    cnt = 0
+    for i in range(len(appIdList)):
+        tmp = list(allAppInfo[i])
+        if cnt < len(curGroupAppIdList) and appIdList[i] == curGroupAppIdList[cnt][0]:
+            tmp.append('允许')
+            cnt += 1
+        else:
+            tmp.append('拒绝')
+        ruleInfo.append(tmp)
+
+    return render_template('manage_group_rule.html', flag='2', groupInfo=res, groupId=modId, ruleInfo=ruleInfo,
+                           lenRuleInfo=len(ruleInfo))
+
+
+@app.route('/app/manage_group_rule/<groupId>/implement/', methods=['POST'])
+@login_required
+def app_manage_group_rule_modify_implement(groupId):
+    """
+    修改某组的应用规则【操作】
+    :param groupId:要修改的组ID
+    :return:
+    """
+    if request.method == 'POST':
+        modBtn = list(request.form.keys())[0]  # 用户点击的按钮的name
+        appId = list(request.form.values())[0]  # 用户点击的按钮的value，即用户请求修改的应用ID
+        if modBtn == 'permitbtn':  # 要修改为允许
+            sql = "select max(app_group_rule_id) " \
+                  "from app_group_rule;"
+            res = sql_query(sql)
+            if res[0][0] is None:
+                maxId = 0
+            else:
+                maxId = res[0][0]
+
+            sql = "insert into app_group_rule(app_group_rule_id,app_id,group_id) " \
+                  "values({0},'{1}','{2}');".format(maxId+1, appId, groupId)
+            sql_modify(sql)
+        elif modBtn == 'denybtn':  # 要修改为拒绝
+            sql = "delete from app_group_rule " \
+                  "where app_id='{0}' and group_id='{1}';".format(appId, groupId)
+            sql_modify(sql)
+        return redirect(url_for('app_manage_group_rule_modify', groupId=groupId))
+
+
+@app.route('/app/manage_role_rule/', methods=['GET', 'POST'])
+@login_required
+def app_manage_role_rule():
+    """
+    （管理员）管理应用-角色规则
+    :return:
+    """
+    if request.method == 'GET':
+        if not check_app_accessibility(current_user.id, DICT_appId['ManageRoleRule']):
+            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
+                                                        'permission to access the MANAGE_ROLE_RULE app.')
+        return render_template('manage_role_rule.html')
 
 
 if __name__ == "__main__":

@@ -62,20 +62,6 @@
                         操作2
                     </div>
                     <div class="card-body">
-                        <h3 class="card-title">修改用户特权</h3>
-                        <br>
-                        <p class="card-text">点击按钮，<mark>修改</mark>用户的特殊权限。特殊权限与用户角色和属组无关。</p>
-                        <br>
-                        <input class="btn btn-primary" type="button" value="修改权限" onclick="location.href='/app/modify_special_authority/'">
-                    </div>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="card border-dark shadow-lg">
-                    <div class="card-header text-center">
-                        操作3
-                    </div>
-                    <div class="card-body">
                         <h3 class="card-title">修改个人信息</h3>
                         <br>
                         <p class="card-text">点击按钮，<mark>修改</mark>您的个人信息。</p>
@@ -88,7 +74,7 @@
             <div class="col-3">
                 <div class="card border-dark shadow-lg">
                     <div class="card-header text-center">
-                        操作4
+                        操作3
                     </div>
                     <div class="card-body">
                         <h3 class="card-title">上传文件</h3>
@@ -100,9 +86,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <br><br>
-        <div class="row">
             <div class="col-3">
                 <div class="card border-dark shadow-lg">
                     <div class="card-header text-center">
@@ -118,27 +101,35 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <br><br>
+        <div class="row">
+            <div class="col-3">
+                <div class="card border-dark shadow-lg">
+                    <div class="card-header text-center">
+                        操作5
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">修改用户特权</h3>
+                        <br>
+                        <p class="card-text">点击按钮，<mark>修改</mark>用户的特殊权限。特殊权限与用户角色和属组无关。</p>
+                        <br>
+                        <input class="btn btn-primary" type="button" value="修改权限" onclick="location.href='/app/modify_special_authority/'">
+                    </div>
+                </div>
+            </div>
             <div class="col-3">
                 <div class="card border-dark shadow-lg">
                     <div class="card-header text-center">
                         操作6
                     </div>
                     <div class="card-body">
-                        <h3 class="card-title plcaeholder-glow">
-                            <span class="placeholder col-6"></span>
-                        </h3>
-                        <p class="card-text placeholder-glow">
-                            <span class="placeholder col-7"></span>
-                            <span class="placeholder col-4"></span>
-                            <span class="placeholder col-4"></span>
-                            <span class="placeholder col-6"></span>
-                            <span class="placeholder col-8"></span>
-                            <span class="placeholder col-10"></span>
-                        </p>
-                        <button class="btn btn-primary" type="button" disabled>
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            功能维护中...
-                        </button>
+                        <h3 class="card-title plcaeholder-glow">组管理</h3>
+                        <br>
+                        <p class="card-text">点击按钮，管理<mark>应用-组规则</mark>。</p>
+                        <br>
+                        <br>
+                        <input class="btn btn-primary" type="button" value="管理组" onclick="location.href='/app/manage_group_rule/'">
                     </div>
                 </div>
             </div>
@@ -148,21 +139,12 @@
                         操作7
                     </div>
                     <div class="card-body">
-                        <h3 class="card-title plcaeholder-glow">
-                            <span class="placeholder col-6"></span>
-                        </h3>
-                        <p class="card-text placeholder-glow">
-                            <span class="placeholder col-7"></span>
-                            <span class="placeholder col-4"></span>
-                            <span class="placeholder col-4"></span>
-                            <span class="placeholder col-6"></span>
-                            <span class="placeholder col-8"></span>
-                            <span class="placeholder col-10"></span>
-                        </p>
-                        <button class="btn btn-primary" type="button" disabled>
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            功能维护中...
-                        </button>
+                        <h3 class="card-title plcaeholder-glow">角色管理</h3>
+                        <br>
+                        <p class="card-text">点击按钮，管理<mark>应用-角色规则</mark>。</p>
+                        <br>
+                        <br>
+                        <input class="btn btn-primary" type="button" value="管理角色" onclick="location.href='/app/manage_role_rule/'">
                     </div>
                 </div>
             </div>
@@ -172,34 +154,15 @@
                         操作8
                     </div>
                     <div class="card-body">
-                        <h3 class="card-title plcaeholder-glow">
-                            <span class="placeholder col-6"></span>
-                        </h3>
-                        <p class="card-text placeholder-glow">
-                            <span class="placeholder col-7"></span>
-                            <span class="placeholder col-4"></span>
-                            <span class="placeholder col-4"></span>
-                            <span class="placeholder col-6"></span>
-                            <span class="placeholder col-8"></span>
-                            <span class="placeholder col-10"></span>
-                        </p>
-                        <button class="btn btn-primary" type="button" disabled>
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            功能维护中...
-                        </button>
+                        <h3 class="card-title plcaeholder-glow">用户管理</h3>
+                        <br>
+                        <p class="card-text">点击按钮，管理<mark>用户</mark>。</p>
+                        <br>
+                        <br>
+                        <input class="btn btn-primary" type="button" value="管理用户" onclick="location.href='/app/manage_user/'">
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="container text-center fixed-bottom">
-        <div class="row">
-            <div class="col-2"></div>
-            <div class="col-8">
-                <p><span class="badge rounded-pill bg-success" style="font-size: 15px">Python安全编程·实验测试网页</span></p>
-                <p class="text-muted"><small>请使用电脑端最新版本浏览器访问，并保持页面原始缩放比例，以获得最佳浏览效果。</small></p>
-            </div>
-            <div class="col-2"></div>
         </div>
     </div>
     <script>
