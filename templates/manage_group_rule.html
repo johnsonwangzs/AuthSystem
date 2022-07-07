@@ -13,6 +13,39 @@
         <h1>组管理</h1>
         <h4>管理组及其应用访问权限</h4>
     </div>
+    {% if flag=='3' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              修改成功！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% elif flag=='-1' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              您不能对超级管理员 ID:{{userId}} 所在组进行修改！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="container my-3">
         <div class="row">
             <div class="col-3">
@@ -26,12 +59,12 @@
             <div class="col-8"></div>
             <div class="col-1">
                 <form method="GET" action="{{ '/user_main/' + current_user.id + '/' }}">
-                    <button type="submit" class="btn btn-outline-success">回主页</button>
+                    <button type="submit" class="btn btn-outline-success float-end">回主页</button>
                 </form>
             </div>
         </div>
     </div>
-    {% if flag=='1' or flag=='3' %}
+    {% if flag=='1' or flag=='-1'%}
     <div class="container my-3">
         <table class="table table-striped table-hover table-light" border="1" id="info">
             <thead>
@@ -59,7 +92,7 @@
                                 可访问应用
                               </button>
                             </h2>
-                            <div id="flush-collapse{{(i+1)}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                            <div id="flush-collapse{{(i+1)}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne">
                               <div class="accordion-body">
                                   {% for each in groupInfo[i][3] %}
                                   {{each[0]}} | {{each[1]}}<br>
@@ -71,7 +104,7 @@
                     </td>
                     <td>
                         <form method="post" enctype="multipart/form-data" action="{{ '/app/manage_group_rule/' + groupInfo[i][0] + '/'}}">
-                            <button type="submit" value="{{groupInfo[i][0]}}" class="btn btn-outline-primary" name="modifybtn">修改</button>
+                            <button type="submit" value="{{groupInfo[i][0]}}" class="btn btn-warning btn" name="modifybtn">修改</button>
                         </form>
                     </td>
                 </tr>
@@ -79,14 +112,14 @@
             </tbody>
         </table>
     </div>
-    {% elif flag=='2' %}
+    {% elif flag=='2' or flag=='3' %}
     <div class="container my-3">
         <p class="fw-bold text-center" style="font-size: 25px">修改 ID: {{groupId}} 组的权限</p>
         <p class="fw-bold text-center text-danger">注意，如果用户的角色允许其访问某个应用，或是已为其分配了该应用的访问特权，那么其仍能访问该应用。</p>
         <table class="table table-striped table-hover table-light" border="1" id="groupInfo">
             <thead>
                 <tr>
-                    <th scope="col">组</th>
+                    <th scope="col">组ID</th>
                     <th scope="col">组名</th>
                     <th scope="col">组描述</th>
                 </tr>

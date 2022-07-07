@@ -28,19 +28,19 @@
         <h1>用户主页</h1>
         <h4>选择您要进行的操作</h4>
     </div>
-    <div class="container my-5">
+    <div class="container my-3">
         <div class="row justify-content-between">
-            <div class="col-2">
-                <h6>欢迎，<span class="badge bg-secondary" id="userId">{{ userId }}</span></h6>
+            <div class="col-4">
+                <h6>欢迎，<span class="badge bg-info" id="userId">{{ userId }}</span><span class="badge bg-success" id="userName">{{ userInfo[0][0] }}</span></h6>
             </div>
             <div class="col-1">
                 <form method="POST" action="/logout/">
-                    <button name="logout" type="submit" class="btn btn-danger">登出</button>
+                    <button name="logout" type="submit" class="btn btn-danger float-end">登出</button>
                 </form>
             </div>
         </div>
     </div>
-    <div class="container my-5">
+    <div class="container my-3">
         <div class="row">
             <div class="col-3">
                 <div class="card border-dark shadow-lg">

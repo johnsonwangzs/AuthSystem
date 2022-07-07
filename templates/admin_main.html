@@ -28,19 +28,19 @@
         <h1>管理员控制台</h1>
         <h4>选择您要进行的操作</h4>
     </div>
-    <div class="container my-5">
+    <div class="container my-3">
         <div class="row justify-content-between">
             <div class="col-2">
                 <h6>欢迎，<span class="badge bg-secondary" id="userId">{{ userId }}</span></h6>
             </div>
             <div class="col-1">
                 <form method="POST" action="/logout/">
-                    <button name="logout" type="submit" class="btn btn-danger">登出</button>
+                    <button name="logout" type="submit" class="btn btn-danger float-end">登出</button>
                 </form>
             </div>
         </div>
     </div>
-    <div class="container my-5">
+    <div class="container my-3">
         <div class="row">
             <div class="col-3">
                 <div class="card border-dark shadow-lg">
@@ -110,11 +110,11 @@
                         操作5
                     </div>
                     <div class="card-body">
-                        <h3 class="card-title">修改用户特权</h3>
+                        <h3 class="card-title">特权管理</h3>
                         <br>
                         <p class="card-text">点击按钮，<mark>修改</mark>用户的特殊权限。特殊权限与用户角色和属组无关。</p>
                         <br>
-                        <input class="btn btn-primary" type="button" value="修改权限" onclick="location.href='/app/modify_special_authority/'">
+                        <input class="btn btn-primary" type="button" value="修改特权" onclick="location.href='/app/modify_special_authority/'">
                     </div>
                 </div>
             </div>
@@ -156,8 +156,7 @@
                     <div class="card-body">
                         <h3 class="card-title plcaeholder-glow">用户管理</h3>
                         <br>
-                        <p class="card-text">点击按钮，管理<mark>用户</mark>。</p>
-                        <br>
+                        <p class="card-text">点击按钮，管理<mark>用户</mark>。修改用户的属组、角色，新增或删除用户。</p>
                         <br>
                         <input class="btn btn-primary" type="button" value="管理用户" onclick="location.href='/app/manage_user/'">
                     </div>

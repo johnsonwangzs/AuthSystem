@@ -5,10 +5,11 @@
 # @Software : PyCharm
 # @Function :
 
-from flask import Flask, redirect, url_for, render_template, request, send_file
-from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
-import pymysql
 import datetime
+
+import pymysql
+from flask import Flask, redirect, url_for, render_template, request, send_file, session
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
 app = Flask(__name__)  # 初始化Flask app
 app.secret_key = 'WZS_say_hello_to_Flask'
@@ -144,14 +145,6 @@ def logout():
         return redirect(url_for('login'))
 
 
-@app.route('/upload/', methods=['GET', 'POST'])
-@login_required
-def upload_file():
-    if request.method == 'POST':
-        f = request.files['']
-        f.save('./files/')
-
-
 @app.route('/user_main/')
 @app.route('/user_main/<ID>/')
 @login_required
@@ -165,7 +158,11 @@ def user_main_page(ID=None):
         return render_template('caution.html', info='WARNING: You do NOT have permission to view other user\'s pages!')
     if current_user.id == ADMIN:
         return redirect(url_for('admin_main_page'))
-    return render_template('user_main.html', userId=current_user.id)
+    sql = "select name,nickname " \
+          "from user_info " \
+          "where user_id='{0}';".format(current_user.id)
+    userInfo = sql_query(sql)
+    return render_template('user_main.html', userId=current_user.id, userInfo=userInfo)
 
 
 @app.route('/admin_main/', methods=['GET', 'POST'])
@@ -462,20 +459,6 @@ def app_download_file():
             return render_template('download_file.html', user=current_user, flag='-2', res=fileres, lenres=len(fileres))
 
 
-@app.route('/app/manage_user/', methods=['GET', 'POST'])
-@login_required
-def app_manage_user():
-    """
-    （管理员）管理用户
-    :return:
-    """
-    if request.method == 'GET':
-        if not check_app_accessibility(current_user.id, DICT_appId['ManageUser']):
-            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
-                                                        'permission to access the MANAGE_USER app.')
-        return render_template('manage_user.html')
-
-
 @app.route('/app/manage_group_rule/', methods=['GET'])
 @login_required
 def app_manage_group_rule():
@@ -487,6 +470,16 @@ def app_manage_group_rule():
         if not check_app_accessibility(current_user.id, DICT_appId['ManageGroupRule']):
             return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
                                                         'permission to access the MANAGE_GROUP_RULE app.')
+        # 获取url中参数，判断需要返回页面的状态
+        flag = None
+        userId = None
+        if 'flag' in list(request.args.keys()):
+            flag = request.args['flag']
+        if 'userId' in list(request.args.keys()):
+            userId = request.args['userId']
+        if flag is None:
+            flag = '1'
+
         sql = "select * from group_info;"
         res = sql_query(sql)
         group = []
@@ -499,7 +492,7 @@ def app_manage_group_rule():
             res1 = sql_query(sql)
             tmp.append(res1)
             group.append(tmp)
-        return render_template('manage_group_rule.html', flag='1', groupInfo=group, lenres=len(res))
+        return render_template('manage_group_rule.html', flag=flag, userId=userId, groupInfo=group, lenres=len(res))
 
 
 @app.route('/app/manage_group_rule/<groupId>/', methods=['GET', 'POST'])
@@ -510,10 +503,22 @@ def app_manage_group_rule_modify(groupId=None):
     :param groupId: 组ID
     :return:
     """
-    if groupId is None and request.method == 'POST':
+    if request.method == 'GET':
+        if not check_app_accessibility(current_user.id, DICT_appId['ManageGroupRule']):
+            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
+                                                        'permission to access the MANAGE_GROUP_RULE app.')
+    if groupId is None or request.method == 'POST':  # 初次请求页面
+        flag = '2'
         modBtn = list(request.form.keys())[0]  # 用户点击的按钮的name
         modId = list(request.form.values())[0]  # 用户点击的按钮的value，即用户请求修改的组ID
-    else:
+        sql = "select group_id " \
+              "from user_authority " \
+              "where user_id='{0}';".format(ADMIN)
+        res = sql_query(sql)
+        if res[0][0] == modId:  # 不可修改超级管理员所在组
+            return redirect(url_for('app_manage_group_rule', userId=ADMIN, flag='-1'))
+    else:  # 成功修改后刷新页面
+        flag = '3'
         modId = groupId
     sql = "select * from group_info where group_id='{0}';".format(modId)
     res = sql_query(sql)
@@ -539,7 +544,7 @@ def app_manage_group_rule_modify(groupId=None):
             tmp.append('拒绝')
         ruleInfo.append(tmp)
 
-    return render_template('manage_group_rule.html', flag='2', groupInfo=res, groupId=modId, ruleInfo=ruleInfo,
+    return render_template('manage_group_rule.html', flag=flag, groupInfo=res, groupId=modId, ruleInfo=ruleInfo,
                            lenRuleInfo=len(ruleInfo))
 
 
@@ -564,7 +569,7 @@ def app_manage_group_rule_modify_implement(groupId):
                 maxId = res[0][0]
 
             sql = "insert into app_group_rule(app_group_rule_id,app_id,group_id) " \
-                  "values({0},'{1}','{2}');".format(maxId+1, appId, groupId)
+                  "values({0},'{1}','{2}');".format(maxId + 1, appId, groupId)
             sql_modify(sql)
         elif modBtn == 'denybtn':  # 要修改为拒绝
             sql = "delete from app_group_rule " \
@@ -577,14 +582,276 @@ def app_manage_group_rule_modify_implement(groupId):
 @login_required
 def app_manage_role_rule():
     """
-    （管理员）管理应用-角色规则
+    （管理员）管理应用-角色规则【页面】
     :return:
     """
     if request.method == 'GET':
         if not check_app_accessibility(current_user.id, DICT_appId['ManageRoleRule']):
             return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
                                                         'permission to access the MANAGE_ROLE_RULE app.')
-        return render_template('manage_role_rule.html')
+        # 获取url中参数，判断需要返回页面的状态
+        flag = None
+        userId = None
+        if 'flag' in list(request.args.keys()):
+            flag = request.args['flag']
+        if 'userId' in list(request.args.keys()):
+            userId = request.args['userId']
+        if flag is None:
+            flag = '1'
+
+        sql = "select * from role_info;"
+        res = sql_query(sql)
+        role = []
+        for i in range(len(res)):
+            tmp = list(res[i])
+            sql = "select app_info.app_id,app_name " \
+                  "from app_role_rule,app_info " \
+                  "where app_role_rule.app_id=app_info.app_id and role_id='{0}' " \
+                  "order by app_role_rule.app_id;".format(res[i][0])
+            res1 = sql_query(sql)
+            tmp.append(res1)
+            role.append(tmp)
+        return render_template('manage_role_rule.html', flag=flag, userId=userId, roleInfo=role, lenres=len(res))
+
+
+@app.route('/app/manage_role_rule/<roleId>/', methods=['GET', 'POST'])
+@login_required
+def app_manage_role_rule_modify(roleId=None):
+    """
+    修改某个角色的规则【页面】
+    :param roleId: 角色ID
+    :return:
+    """
+    if request.method == 'GET':
+        if not check_app_accessibility(current_user.id, DICT_appId['ManageRoleRule']):
+            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
+                                                        'permission to access the MANAGE_ROLE_RULE app.')
+    if roleId is None or request.method == 'POST':  # 初次请求页面
+        flag = '2'
+        modBtn = list(request.form.keys())[0]  # 用户点击的按钮的name
+        modId = list(request.form.values())[0]  # 用户点击的按钮的value，即用户请求修改的角色ID
+        sql = "select role_id " \
+              "from user_authority " \
+              "where user_id='{0}';".format(ADMIN)
+        res = sql_query(sql)
+        if res[0][0] == modId:  # 不可修改超级管理员所属角色
+            return redirect(url_for('app_manage_role_rule', userId=ADMIN, flag='-1'))
+    else:  # 成功修改后刷新页面
+        flag = '3'
+        modId = roleId
+    sql = "select * from role_info where role_id='{0}';".format(modId)
+    res = sql_query(sql)
+
+    appIdList = list(DICT_appId.values())
+    sql = "select app_id,app_name,app_description " \
+          "from app_info " \
+          "order by app_id;"
+    allAppInfo = sql_query(sql)
+    sql = "select app_info.app_id " \
+          "from app_role_rule,app_info " \
+          "where app_role_rule.app_id=app_info.app_id and role_id='{0}' " \
+          "order by app_info.app_id;".format(modId)
+    curRoleAppIdList = sql_query(sql)
+    ruleInfo = []
+    cnt = 0
+    for i in range(len(appIdList)):
+        tmp = list(allAppInfo[i])
+        if cnt < len(curRoleAppIdList) and appIdList[i] == curRoleAppIdList[cnt][0]:
+            tmp.append('允许')
+            cnt += 1
+        else:
+            tmp.append('拒绝')
+        ruleInfo.append(tmp)
+
+    return render_template('manage_role_rule.html', flag=flag, roleInfo=res, roleId=modId, ruleInfo=ruleInfo,
+                           lenRuleInfo=len(ruleInfo))
+
+
+@app.route('/app/manage_role_rule/<roleId>/implement/', methods=['POST'])
+@login_required
+def app_manage_role_rule_modify_implement(roleId):
+    """
+    修改某角色的应用规则【操作】
+    :param roleId:要修改的角色ID
+    :return:
+    """
+    if request.method == 'POST':
+        modBtn = list(request.form.keys())[0]  # 用户点击的按钮的name
+        appId = list(request.form.values())[0]  # 用户点击的按钮的value，即用户请求修改的应用ID
+        if modBtn == 'permitbtn':  # 要修改为允许
+            sql = "select max(app_role_rule_id) " \
+                  "from app_role_rule;"
+            res = sql_query(sql)
+            if res[0][0] is None:
+                maxId = 0
+            else:
+                maxId = res[0][0]
+
+            sql = "insert into app_role_rule(app_role_rule_id,app_id,role_id) " \
+                  "values({0},'{1}','{2}');".format(maxId + 1, appId, roleId)
+            sql_modify(sql)
+        elif modBtn == 'denybtn':  # 要修改为拒绝
+            sql = "delete from app_role_rule " \
+                  "where app_id='{0}' and role_id='{1}';".format(appId, roleId)
+            sql_modify(sql)
+        return redirect(url_for('app_manage_role_rule_modify', roleId=roleId))
+
+
+@app.route('/app/manage_user/', methods=['GET', 'POST'])
+@login_required
+def app_manage_user():
+    """
+    （管理员）用户管理【页面】
+    :return:
+    """
+    if request.method == 'GET':
+        if not check_app_accessibility(current_user.id, DICT_appId['ManageUser']):
+            return render_template('caution.html', info='WARNING: Access denied! It seems that you do NOT have '
+                                                        'permission to access the MANAGE_USER app.')
+        # 获取url中参数，判断需要返回页面的状态
+        flag = None
+        userId = None
+        if 'flag' in list(request.args.keys()):
+            flag = request.args['flag']
+        if 'userId' in list(request.args.keys()):
+            userId = request.args['userId']
+        if flag is None:
+            flag = '0'
+
+        # 查看（0）、删除（1）、确认删除（2）、非法删除或修改（-1）、创建成功（4）、修改成功（6）
+        if flag == '0' or flag == '1' or flag == '2' or flag == '-1' or flag == '4' or flag == '6':
+            sql = "select user_info.user_id,name,phone,email,group_info.group_id,group_name,role_info.role_id,role_name " \
+                  "from user_info,user_authority,role_info,group_info " \
+                  "where user_info.user_id=user_authority.user_id " \
+                  "and user_authority.role_id=role_info.role_id " \
+                  "and user_authority.group_id=group_info.group_id;"
+            res = sql_query(sql)
+            return render_template('manage_user.html', flag=flag, userId=userId, userInfo=res, lenres=len(res))
+
+    # 创建新用户(3)
+    if request.method == 'POST':
+        sql = "select group_id,group_name " \
+              "from group_info;"
+        groupres = sql_query(sql)
+        sql = "select role_id,role_name " \
+              "from role_info;"
+        roleres = sql_query(sql)
+        return render_template('manage_user.html', flag='3', groupres=groupres, roleres=roleres,
+                               lengroupres=len(groupres),
+                               lenroleres=len(roleres))
+
+
+@app.route('/app/manage_user/<userId>/', methods=['GET', 'POST'])
+@login_required
+def app_manage_user_delOrMod(userId=None):
+    """
+    （管理员）删除用户【操作】
+    :return:
+    """
+    if request.method == 'POST':
+        modBtn = list(request.form.keys())[0]  # 用户点击的按钮的name
+        userId = list(request.form.values())[0]  # 用户点击的按钮的value，即用户请求删除或修改的用户ID
+        if modBtn == 'deletebtn':  # 点击删除
+            session['deleteUserId'] = userId
+            if session['deleteUserId'] == ADMIN:  # 试图删除超级管理员ADMIN
+                return redirect(url_for('app_manage_user', flag='-1', userId=userId))
+            return redirect(url_for('app_manage_user', flag='1', userId=userId))
+        elif modBtn == 'verifybtn':  # 确认删除
+            sql = "delete from user_authority " \
+                  "where user_id='{0}';".format(session['deleteUserId'])
+            sql_modify(sql)
+            sql = "delete from login " \
+                  "where user_id='{0}';".format(session['deleteUserId'])
+            sql_modify(sql)
+            sql = "delete from user_info " \
+                  "where user_id='{0}';".format(session['deleteUserId'])
+            sql_modify(sql)
+            sql = "delete from app_user_rule " \
+                  "where user_id='{0}';".format(session['deleteUserId'])
+            sql_modify(sql)
+            return redirect(url_for('app_manage_user', flag='2', userId=session['deleteUserId']))
+        elif modBtn == 'modifybtn':  # 修改用户
+            if userId == ADMIN:
+                return redirect(url_for('app_manage_user', flag='-1', userId=userId))
+            sql = "select group_id,group_name " \
+                  "from group_info;"
+            groupres = sql_query(sql)
+            sql = "select role_id,role_name " \
+                  "from role_info;"
+            roleres = sql_query(sql)
+            sql = " select role_info.role_id,role_name " \
+                  "from role_info,user_authority " \
+                  "where role_info.role_id=user_authority.role_id and user_id='{0}';".format(userId)
+            userrole = sql_query(sql)
+            sql = "select group_info.group_id,group_name " \
+                  "from group_info,user_authority " \
+                  "where group_info.group_id=user_authority.group_id and user_id='{0}';".format(userId)
+            usergroup = sql_query(sql)
+            return render_template('manage_user.html', flag='5', groupres=groupres, roleres=roleres,
+                                   userId=userId, userrole=userrole, usergroup=usergroup,
+                                   lengroupres=len(groupres), lenroleres=len(roleres))
+
+
+@app.route('/app/manage_user_create/', methods=['POST'])
+@login_required
+def app_manage_user_create():
+    """
+    （管理员）创建新用户【操作】
+    :return:
+    """
+    # 从form中获取用户填入的信息
+    userId = request.form['newUserId']
+    tmpPwd = request.form['userPwd']
+    groupId = request.form['groupSelect']
+    roleId = request.form['roleSelect']
+    name = request.form['name']
+    nickname = request.form['nickname']
+    phone = request.form['phone']
+    email = request.form['email']
+    description = request.form['description']
+
+    # 检查ID是否已存在
+    sql = "select * from login " \
+          "where user_id='{0}';".format(userId)
+    res = sql_query(sql)
+    if len(res) != 0:
+        return render_template('manage_user.html', flag='-2', existUserId=userId)
+
+    # login表分配初始登录信息
+    sql = "insert into login(user_id,password) " \
+          "values('{0}','{1}');".format(userId, tmpPwd)
+    sql_modify(sql)
+    # user_authority分配初始属组和角色
+    sql = "insert into user_authority(user_id,group_id,role_id) " \
+          "values('{0}','{1}','{2}');".format(userId, groupId, roleId)
+    sql_modify(sql)
+    # user_info建立空表
+    sql = "insert into user_info(user_id,name,nickname,phone,email,description) " \
+          "values('{0}','{1}','{2}','{3}','{4}','{5}');".format(userId, name, nickname, phone, email, description)
+    sql_modify(sql)
+    return redirect(url_for('app_manage_user', flag='4'))
+
+
+@app.route('/app/manage_user_modify/<userId>/', methods=['POST'])
+@login_required
+def app_manage_user_modify(userId=None):
+    """
+    （管理员）修改用户属组、角色【操作】
+    :return:
+    """
+    newGroupId = request.form['groupSelect2']
+    newRoleId = request.form['roleSelect2']
+    if newGroupId != 'none':
+        sql = "update user_authority " \
+              "set group_id='{0}' " \
+              "where user_id='{1}';".format(newGroupId, userId)
+        sql_modify(sql)
+    if newRoleId != 'none':
+        sql = "update user_authority " \
+              "set role_id='{0}' " \
+              "where user_id='{1}';".format(newRoleId, userId)
+        sql_modify(sql)
+    return redirect(url_for('app_manage_user', flag='6', userId=userId))
 
 
 if __name__ == "__main__":

@@ -7,12 +7,94 @@
     <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
 </head>
 <body>
     <div class="container-fluid p-3 bg-warning text-black text-center shadow-lg">
         <h1>用户管理</h1>
         <h4>进行用户的创建、删除与修改（属组、角色）</h4>
     </div>
+    {% if flag=='-1' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              您不能对超级管理员 ID:{{userId}} 进行删除或修改！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% elif flag=='2' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              用户 ID:{{userId}} 已删除！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% elif flag=='-2' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              创建失败！指定的用户 ID:{{existUserId}} 已存在，请更换后再试。
+            </div>
+          </div>
+        </div>
+    </div>
+    {% elif flag=='4' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              新用户创建成功！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% elif flag=='6' %}
+    <div class="container">
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <img src="{{ url_for('static', filename='favicon.ico') }}" class="rounded me-2" alt="...">
+              <strong class="me-auto">WebAuthSystem</strong>
+              <small>right now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-center">
+              已成功修改用户 ID:{{userId}} 的属组或角色！
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="container my-3">
         <div class="row">
             <div class="col-3">
@@ -23,19 +105,389 @@
                     </ol>
                 </nav>
             </div>
+            {% if flag=='3' or flag=='5' %}
             <div class="col-8"></div>
             <div class="col-1">
                 <form method="GET" action="{{ '/user_main/' + current_user.id + '/' }}">
-                    <button type="submit" class="btn btn-outline-success">回主页</button>
+                    <button type="submit" class="btn btn-outline-success float-end">回主页</button>
                 </form>
             </div>
+            {% else %}
+            <div class="col-6"></div>
+            <div class="col-2">
+                <form method="POST" action="/app/manage_user/">
+                    <button type="submit" class="btn btn-outline-primary float-end">创建新用户</button>
+                </form>
+            </div>
+            <div class="col-1">
+                <form method="GET" action="{{ '/user_main/' + current_user.id + '/' }}">
+                    <button type="submit" class="btn btn-outline-success float-end">回主页</button>
+                </form>
+            </div>
+            {% endif %}
         </div>
     </div>
-
+    {% if flag=='0' or flag=='1' or flag=='2' or flag=='-1' or flag=='4' or flag=='6' %}
+    <div class="container my-3">
+        <input id="alertbtn" type="button" value="button" style="display:none;" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        <table class="table table-striped table-hover table-light" border="1" id="info">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">ID</th>
+                    <th scope="col">姓名</th>
+                    <th scope="col">电话</th>
+                    <th scope="col">邮箱</th>
+                    <th scope="col">属组ID</th>
+                    <th scope="col">属组名</th>
+                    <th scope="col">角色ID</th>
+                    <th scope="col">角色名</th>
+                    <th scope="col">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(lenres) %}
+                <tr>
+                    <th scope="row">{{i+1}}</th>
+                    <td>{{userInfo[i][0]}}</td>
+                    <td>{{userInfo[i][1]}}</td>
+                    <td>{{userInfo[i][2]}}</td>
+                    <td>{{userInfo[i][3]}}</td>
+                    <td>{{userInfo[i][4]}}</td>
+                    <td>{{userInfo[i][5]}}</td>
+                    <td>{{userInfo[i][6]}}</td>
+                    <td>{{userInfo[i][7]}}</td>
+                    <td>
+                        <form method="post" enctype="multipart/form-data" action="{{ '/app/manage_user/' + userInfo[i][0] + '/'}}">
+                            <button type="submit" value="{{userInfo[i][0]}}" class="btn btn-warning btn-sm" name="modifybtn">修改</button>
+                            <button type="submit" value="{{userInfo[i][0]}}" id="deletebtn" class="btn btn-danger btn-sm" name="deletebtn">删除</button>
+                            {% if flag=='1' %}
+                            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="staticBackdropLabel">确认操作</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            将要删除用户 ID:{{userId}} 。您确认吗？
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" value="none" class="btn btn-danger btn-sm" name="verifybtn" id="verifybtn">确认删除</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% elif flag=='3' %}
+    <div class="container my-3">
+        <input id="cautionbtn" type="button" value="button" style="display:none;" data-bs-toggle="modal" data-bs-target="#staticBackdrop2">
+        <p class="fw-bold text-center" style="font-size: 25px">创建新用户</p>
+        <form class="row g-3" method="post" enctype="multipart/form-data" action="/app/manage_user_create/">
+            <div class="col-md-1"></div>
+            <div class="col-md-4">
+                <div class="row g-3">
+                    <legend class="text-center">创建登录信息</legend>
+                    <div class="mb-3">
+                        <label for="newUserId" class="h5 form-label badge bg-primary" style="font-size: 17px">用户ID | UID</label>
+                        <input type="text" class="form-control" id="newUserId" name="newUserId" oninput="checkIdValidity()">
+                        <div id="idHelp" class="form-text">用户ID唯一，不应与已有用户ID重复。</div>
+                        <div id="idInvalidFeedback" class="invalid-feedback">用户ID必须为6位，且需为0~9组成</div>
+                        <div id="idValidFeedback" class="valid-feedback">看起来不错！</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userPwd" class="h5 form-label badge bg-primary" style="font-size: 17px">密码 | PASSWORD</label>
+                        <input type="password" class="form-control" id="userPwd" name="userPwd" oninput="checkPwdValidity()">
+                        <div id="passwordHelpInline" class="form-text">应仅作为该用户的初始（临时）密码。</div>
+                        <div id="pwdInvalidFeedback" class="invalid-feedback">密码过短或过长！（8-20位）</div>
+                        <div id="pwdValidFeedback" class="valid-feedback">看起来不错！</div>
+                    </div>
+                </div>
+                <br><br>
+                <div class="row g-3">
+                    <legend class="text-center">指定属组和角色</legend>
+                    <div class="mb-3">
+                       <label for="group" class="h5 form-label badge bg-primary" style="font-size: 17px">选择属组 | GROUP</label>
+                       <select id="group" class="form-select" name="groupSelect" onclick="checkGroupValidity()">
+                           <option selected value="none">属组ID | 属组名 为用户分配属组...</option>
+                           {% for i in range(lengroupres) %}
+                           <option value={{groupres[i][0]}}>- {{ groupres[i][0] }} | {{ groupres[i][1] }} -</option>
+                           {% endfor %}}
+                       </select>
+                        <div id="groupInvalidFeedback" class="invalid-feedback">请选择属组！</div>
+                        <div id="groupValidFeedback" class="valid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                       <label for="role" class="h5 form-label badge bg-primary" style="font-size: 17px">选择角色 | ROLE</label>
+                       <select id="role" class="form-select" name="roleSelect" onclick="checkRoleValidity()">
+                           <option selected value="none">角色ID | 角色名 为用户分配角色...</option>
+                           {% for i in range(lenroleres) %}
+                           <option value={{roleres[i][0]}}>- {{ roleres[i][0] }} | {{ roleres[i][1] }} -</option>
+                           {% endfor %}}
+                       </select>
+                        <div id="roleInvalidFeedback" class="invalid-feedback">请选择角色！</div>
+                        <div id="roleValidFeedback" class="valid-feedback"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2"></div>
+            <div class="col-md-4">
+                <div class="row g-3">
+                    <legend class="text-center">设置初始个人信息</legend>
+                    <div class="mb-3">
+                        <label for="name" class="h5 form-label badge bg-success" style="font-size: 17px">姓名 | REAL NAME</label>
+                        <input type="text" class="form-control" id="name" name="name" oninput="checkNameValidity()">
+                        <div id="nameInvalidFeedback" class="invalid-feedback">请输入姓名！</div>
+                        <div id="nameValidFeedback" class="valid-feedback">看起来不错！</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nickname" class="h5 form-label badge bg-success" style="font-size: 17px">昵称 | NICKNAME</label>
+                        <input type="text" class="form-control" id="nickname" name="nickname">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="h5 form-label badge bg-success" style="font-size: 17px">电话 | PHONE</label>
+                        <input type="text" class="form-control" id="phone" name="phone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="h5 form-label badge bg-success" style="font-size: 17px">邮箱 | EMAIL</label>
+                        <input type="text" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="h5 form-label badge bg-success" style="font-size: 17px">介绍 | DESCRIPTION</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="mb-3 text-center">
+                <button type="button" class="btn btn-warning" id="submitUser" onclick="trySubmit()">确认创建新用户</button>
+            </div>
+            <div class="modal fade" id="staticBackdrop2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="staticBackdropLabel2">确认操作</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            即将创建新用户！确认吗？
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" value="none" class="btn btn-danger btn-sm" name="verifybtn2" id="verifybtn2">确认创建</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% elif flag=='5' %}
+    <div class="container my-3">
+        <input id="cautionbtn2" type="button" value="button" style="display:none;" data-bs-toggle="modal" data-bs-target="#staticBackdrop3">
+        <p class="fw-bold text-center" style="font-size: 25px">修改用户 ID:{{userId}} 的属组和角色</p>
+        <br>
+        <div class="row g-3">
+            <div class="col-1"></div>
+            <div class="col-4">
+                <div class="card float-end" style="width: 29rem;">
+                    <div class="card-header h5 text-center">
+                        用户当前属组与角色
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><span class="badge bg-success text-white" style="font-size: 17px">属组ID | 属组名</span><br> {{usergroup[0][0]}} | {{usergroup[0][1]}}</li>
+                        <li class="list-group-item"><span class="badge bg-success text-white" style="font-size: 17px">角色ID | 角色名</span><br> {{userrole[0][0]}} | {{userrole[0][1]}}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-2"></div>
+            <div class="col-4">
+                <form class="row g-3" method="post" enctype="multipart/form-data" action="{{'/app/manage_user_modify/'+userId+'/'}}">
+                    <div class="mb-3">
+                       <label for="group2" class="h5 form-label badge bg-primary" style="font-size: 17px">选择新的属组 | GROUP</label>
+                       <select id="group2" class="form-select" name="groupSelect2" onclick="checkGroupValidity()">
+                           <option selected value="none">属组ID | 属组名 为用户分配属组...</option>
+                           {% for i in range(lengroupres) %}
+                           <option value={{groupres[i][0]}}>- {{ groupres[i][0] }} | {{ groupres[i][1] }} -</option>
+                           {% endfor %}}
+                       </select>
+                        <div id="groupInvalidFeedback2" class="invalid-feedback">请选择属组！</div>
+                        <div id="groupValidFeedback2" class="valid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                       <label for="role2" class="h5 form-label badge bg-primary" style="font-size: 17px">选择新的角色 | ROLE</label>
+                       <select id="role2" class="form-select" name="roleSelect2" onclick="checkRoleValidity()">
+                           <option selected value="none">角色ID | 角色名 为用户分配角色...</option>
+                           {% for i in range(lenroleres) %}
+                           <option value={{roleres[i][0]}}>- {{ roleres[i][0] }} | {{ roleres[i][1] }} -</option>
+                           {% endfor %}}
+                       </select>
+                        <div id="roleInvalidFeedback2" class="invalid-feedback">请选择角色！</div>
+                        <div id="roleValidFeedback2" class="valid-feedback"></div>
+                    </div>
+                    <div class="mb-3 text-center">
+                        <button type="button" class="btn btn-warning" id="submitUser2" onclick="tryModify()">确认修改</button>
+                    </div>
+                    <div class="modal fade" id="staticBackdrop3" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="staticBackdropLabel3">确认操作</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    即将修改用户属组或角色！确认吗？
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" value="none" class="btn btn-danger btn-sm" name="verifybtn3" id="verifybtn3">确认修改</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-1"></div>
+        </div>
+    </div>
+    {% endif %}
     <script>
-        var toastLive = document.getElementById('liveToast')
+        var toastLive = document.getElementById('liveToast');
         var toast = new bootstrap.Toast(toastLive);
         toast.show();
+    </script>
+    <script>
+        function emulateMouseClick (element) {
+            var event = document.createEvent('MouseEvents');
+            event.initEvent('click', true, true);
+            element.dispatchEvent(event);
+        }
+        let elem = document.getElementById('alertbtn');
+        elem.addEventListener('click', function (e) {
+            console.log('success');
+        }, false)
+        emulateMouseClick(elem);
+    </script>
+    <script>
+        var flagId = false;
+        var flagPwd = false;
+
+        function checkIdValidity() {
+            let x = document.getElementById("newUserId").value;
+            let patrn = /^[0-9]+[0-9]?[0-9]*$/;
+            if (!patrn.test(x)) {
+                document.getElementById("newUserId").setAttribute("class", "form-control is-invalid");
+                flagId = false;
+            } else if ((x.length < 6 && x.length >= 1) || x.length > 6) {
+                document.getElementById("newUserId").setAttribute("class", "form-control is-invalid");
+                flagId = false;
+            } else if (x === '') {
+                document.getElementById("newUserId").setAttribute("class", "form-control is-invalid");
+                flagId = false;
+            } else {
+                document.getElementById("newUserId").setAttribute("class", "form-control is-valid");
+                flagId = true;
+            }
+            return flagId
+        }
+
+        function checkPwdValidity() {
+            let x = document.getElementById("userPwd").value;
+            if ((x.length < 8 && x.length > 0) || x.length > 20) {
+                document.getElementById("userPwd").setAttribute("class", "form-control is-invalid");
+                flagPwd = false;
+            } else if (x === '') {
+                document.getElementById("userPwd").setAttribute("class", "form-control is-invalid");
+                flagPwd = false;
+            } else {
+                document.getElementById("userPwd").setAttribute("class", "form-control is-valid");
+                flagPwd = true;
+            }
+            return flagPwd
+        }
+
+        function checkGroupValidity() {
+            let x = document.getElementById("group").value;
+            if (x !== 'none') {
+                document.getElementById("group").setAttribute("class", "form-control is-valid");
+            } else {
+                document.getElementById("group").setAttribute("class", "form-control is-invalid");
+            }
+            return x !== 'none';
+
+        }
+
+        function checkRoleValidity() {
+            let x = document.getElementById("role").value;
+            if (x !== 'none') {
+                document.getElementById("role").setAttribute("class", "form-control is-valid");
+            } else {
+                document.getElementById("role").setAttribute("class", "form-control is-invalid");
+            }
+            return x !== 'none';
+        }
+
+        function checkNameValidity() {
+            let x = document.getElementById("name").value;
+            if(x !== '') {
+                document.getElementById("name").setAttribute("class", "form-control is-valid");
+            } else {
+                document.getElementById("name").setAttribute("class", "form-control is-invalid");
+            }
+            return x !== '';
+        }
+
+        function trySubmit () {
+            if (checkIdValidity() && checkPwdValidity() && checkGroupValidity() && checkRoleValidity() && checkNameValidity()) {
+                function emulateMouseClick2 (element) {
+                    var event = document.createEvent('MouseEvents');
+                    event.initEvent('click', true, true);
+                    element.dispatchEvent(event);
+                }
+                let elem2 = document.getElementById('cautionbtn');
+                elem2.addEventListener('click', function (e) {
+                    console.log('success');
+                }, false)
+                emulateMouseClick2(elem2);
+            } else {
+                if (!checkPwdValidity()) {
+                    document.getElementById("userPwd").setAttribute("class", "form-control is-invalid");
+                }
+                if (!checkIdValidity()) {
+                    document.getElementById("newUserId").setAttribute("class", "form-control is-invalid");
+                }
+                if (!checkGroupValidity()) {
+                    document.getElementById("group").setAttribute("class", "form-select is-invalid");
+                }
+                if (!checkRoleValidity()) {
+                    document.getElementById("role").setAttribute("class", "form-select is-invalid");
+                }
+                if (!checkNameValidity()) {
+                    document.getElementById("name").setAttribute("class", "form-control is-invalid");
+                }
+                console.log("fail to submit!"+ " "+ checkIdValidity() + " " + checkPwdValidity() + " "
+                    + checkGroupValidity() + " " + checkRoleValidity() + " " + checkNameValidity());
+            }
+        }
+    </script>
+    <script>
+        function tryModify() {
+            function emulateMouseClick3(element) {
+                var event = document.createEvent('MouseEvents');
+                event.initEvent('click', true, true);
+                element.dispatchEvent(event);
+            }
+
+            let elem3 = document.getElementById('cautionbtn2');
+            elem3.addEventListener('click', function (e) {
+                console.log('success');
+            }, false)
+            emulateMouseClick3(elem3);
+        }
     </script>
 </body>
 </html>
