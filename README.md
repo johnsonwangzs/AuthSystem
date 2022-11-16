@@ -1,5 +1,5 @@
 # AuthSystem
-A authentication and authority management system based on Flask.
+An authentication and authority management system based on Flask.
 
 ---
 
