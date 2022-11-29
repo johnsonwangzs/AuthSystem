@@ -1,5 +1,7 @@
 # AuthSystem
 An authentication and authority management system based on Flask.
+==注意，只实现了基础的功能，有些写法比较初级（如未使用蓝图，数据库操作不够模块化），且缺少安全细节（如口令存储、防范各种网页攻击等），后期有空再加。==
+**建议配合https://github.com/johnsonwangzs/TestFlask食用（使用了Flask蓝图等高级用法，以及Flask-Login、Flask-wtforms等扩展）。**
 
 ---
 
